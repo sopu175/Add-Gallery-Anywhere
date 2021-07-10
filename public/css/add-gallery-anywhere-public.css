@@ -1,0 +1,73 @@
+/**
+ * All of the CSS for your public-facing functionality should be
+ * included in this file.
+
+
+ #gallery section
+ #gallery section title
+ #gallery image margin
+ #gallery image background
+ #gallery image anchor / link
+ #gallery section hover overflow
+ #gallery section over transition
+ */
+
+
+
+/*gallery section*/
+.add_gallery_any_where_section{
+    padding: 80px 0 50px;
+    background: #fdf5f5;
+}
+
+
+/*gallery section title*/
+.add_gallery_any_where_section .mainTitle{
+    margin: 0 0 40px;
+    font-size: 30px;
+    font-weight: 500;
+    font-family: inherit;
+    text-transform: capitalize;
+}
+
+
+/*gallery image margin*/
+.add_gallery_any_where_section .add_gallery_any_where_section_image_single{
+    margin-bottom: 30px;
+}
+
+
+/*gallery image background*/
+.add_gallery_any_where_section .image_bg{
+    background-size: cover;
+    padding-top: 65%;
+    background-position: center;
+    transform: scale(1.01);
+    position: relative;
+    background-repeat: no-repeat;
+    transition: all 0.5s ease-in;
+}
+
+
+/*gallery image anchor / link*/
+.add_gallery_any_where_section .image_bg a{
+    position: absolute;
+    top: 0;
+    left: 0;
+    right:0;
+    bottom:0;
+    z-index: 1;
+}
+
+
+/*gallery section hover overflow*/
+.add_gallery_any_where_section .hover_with_overflow{
+    overflow: hidden;
+}
+
+
+
+/*gallery section over transition*/
+.add_gallery_any_where_section .hover_with_overflow:hover .image_bg{
+    transform: scale(1.04);
+}
