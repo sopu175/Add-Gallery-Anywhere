@@ -273,11 +273,10 @@ class Add_Gallery_Anywhere_Admin
     {
         $gallery_data = get_post_meta($post->ID, 'gallery_any_where', true);
         $selected_column = isset($gallery_data['show_per_image']) ? esc_attr($gallery_data['show_per_image']) : 'Default';
-        $image_url = isset($gallery_data['gallery_url']) ? esc_url($gallery_data['gallery_url']) : '';
+        $image_data = isset($gallery_data['gallery_url']) && is_array($gallery_data['gallery_url']) ? $gallery_data['gallery_url'] : [];
 
         wp_nonce_field('gallery_any_where', 'gallery_any_where_nonce');
 
-        // Dropdown options
         $options = array(
             'Default' => __('Default', 'gallery_any_where'),
             '6' => __('Six', 'gallery_any_where'),
@@ -287,39 +286,34 @@ class Add_Gallery_Anywhere_Admin
         );
 
         echo '<div class="fields"><div class="field_c"><div class="input_c">';
+
         echo '<label for="upload_images" class="mylabel"><strong>' . esc_html__('Add Gallery Images', 'gallery_any_where') . '</strong>';
         echo '<button class="button" id="upload_images">' . esc_html__('Upload Images', 'gallery_any_where') . '</button></label><hr>';
 
         echo '<label for="show_per_img" class="mylabel" style="margin-top:15px"><strong>' . esc_html__('Show image per columns', 'gallery_any_where') . '</strong>';
         echo '<select name="show_per_image" id="show_per_img">';
         foreach ($options as $value => $label) {
-
-            if($selected_column == $value){
-                echo '<option selected value="' . esc_attr($value)  .'">' . esc_html($label) . '</option>';
-
-            }else{
-                echo '<option value="' . esc_attr($value)  .'">' . esc_html($label) . '</option>';
-
-            }
-            echo   $value . ' - ' . $selected_column;
+            $selected = ($selected_column == $value) ? 'selected' : '';
+            echo '<option value="' . esc_attr($value) . '" ' . $selected . '>' . esc_html($label) . '</option>';
         }
         echo '</select></label><hr>';
 
-        echo '<input type="hidden" name="omb_images_url" id="omb_images_url" value="' . esc_attr($image_url) . '"/>';
-        echo '<div class="clearfix"></div><div style="width:100%;height:auto;" id="images-container">';
+        echo '<input type="hidden" name="omb_images_url" id="omb_images_url" value="' . esc_attr(json_encode($image_data)) . '"/>';
 
-        // show previously uploaded images
-        if (!empty($image_url)) {
-            $urls = explode(';', $image_url);
-            foreach ($urls as $url) {
-                echo '<img class="admin_image_single" style="margin-right: 10px;" src="' . esc_url($url) . '" />';
-            }
+        echo '<div class="clearfix"></div><div style="width:100%;height:auto;" id="images-container">';
+        foreach ($image_data as $img) {
+            $url = esc_url($img['url'] ?? '');
+            $alt = esc_html($img['alt'] ?? '');
+            $caption = esc_html($img['caption'] ?? '');
+            echo '<div class="admin_image_single_wrapper">';
+            echo '<img class="admin_image_single" style="margin-right: 10px; max-width: 100px;" src="' . $url . '" />';
+            echo '<small><strong>Alt:</strong> ' . $alt . '</small>';
+            echo '<small><strong>Caption:</strong> ' . $caption . '</small>';
+            echo '</div>';
         }
 
         echo '</div><div class="clearfix"></div><hr></div><div class="float_c"></div></div></div>';
-
     }
-
 
 
 
@@ -337,24 +331,19 @@ class Add_Gallery_Anywhere_Admin
         }
 
         $short_code = '[galleryanywhere id="' . $post_id . '"]';
-        $image_url = isset($_POST['omb_images_url']) ? $_POST['omb_images_url'] : '';
-        $image_url = esc_url($image_url,'gallery_any_where');
+        $image_json = isset($_POST['omb_images_url']) ? wp_unslash($_POST['omb_images_url']) : '';
+        $image_data = json_decode($image_json, true);
 
-        if (empty($image_url)) {
-
-        } else {
+        if (!empty($image_data) && is_array($image_data)) {
             $data = array(
-                'gallery_url' => $image_url,
-                'shortcode' => sanitize_text_field($short_code,'gallery_any_where'),
-                'show_per_image' => sanitize_text_field($_POST['show_per_image'],'gallery_any_where')
-
+                'gallery_url' => $image_data, // full structured image data
+                'shortcode' => sanitize_text_field($short_code),
+                'show_per_image' => isset($_POST['show_per_image']) ? sanitize_text_field($_POST['show_per_image']) : 'Default'
             );
-
             update_post_meta($post_id, 'gallery_any_where', $data);
         }
-
-
     }
+
 
 
 

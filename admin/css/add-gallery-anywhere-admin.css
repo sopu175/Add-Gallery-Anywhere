@@ -41,11 +41,28 @@
 }
 
 /*post type admin image view single*/
+#images-container {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.admin_image_single_wrapper {
+    max-width: calc(25% - 5px);
+    flex: 0 0 calc(25% - 5px);
+    display: flex;
+    flex-direction: column;
+
+}
+
 .admin_image_single {
     height: 150px;
     margin-top: 5px;
     margin-right: 15px;
-    width: calc(25% - 15px);
+    width: 100%;
+    max-width: 100% !important;
     object-fit: cover;
 }
 
@@ -67,7 +84,6 @@
 .post-type-gallery_anywhere .notice-success.updated p a {
     display: none !important;
 }
-
 
 
 @media (min-width: 1530px) {

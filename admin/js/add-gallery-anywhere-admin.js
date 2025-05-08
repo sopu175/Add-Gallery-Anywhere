@@ -30,48 +30,47 @@
 	 */
 	var frame, gframe , i;
 	$(document).ready(function () {
+		let gframe;
 
-
-		// click upload button events
 		$("#upload_images").on("click", function () {
-
-
-			// wordpress javascript reference wp media
 			if (gframe) {
 				gframe.open();
 				return false;
 			}
-			// set multiple image select feature
+
 			gframe = wp.media({
-				title: "Select Image",
-				button: {
-					text: "Insert Image"
-				},
-
-				multiple: true,
-
+				title: "Select Images",
+				button: { text: "Insert Images" },
+				multiple: true
 			});
 
 			gframe.on('select', function () {
-				var image_ids = [];
-				var image_urls = [];
-				var attachments = gframe.state().get('selection').toJSON();
+				const attachments = gframe.state().get('selection').toJSON();
+				const imageData = [];
 
 				$("#images-container").html('');
-				for (i in attachments) {
-					var attachment = attachments[i];
-					image_ids.push(attachment.id);
 
-					image_urls.push(attachment.sizes.full.url);
-					$("#images-container").append(`<img class="admin_image_single" style="margin-right: 10px;" src='${attachment.sizes.full.url}' />`);
+				attachments.forEach(attachment => {
+					const image = {
+						url: attachment.sizes?.full?.url || attachment.url,
+						alt: attachment.alt || '',
+						caption: attachment.caption || ''
+					};
 
-				}
+					imageData.push(image);
 
-				$("#omb_images_url").val(image_urls.join(";"));
+					$("#images-container").append(`
+						<div class="admin_image_single_wrapper" style="margin-right: 10px; display: inline-block;">
+							<img class="admin_image_single" src="${image.url}" style="display:block; max-width:100px;" />
+							<small><strong>Alt:</strong> ${image.alt}</small>
+							<small><strong>Caption:</strong> ${image.caption}</small>
+						</div>
+					`);
+				});
 
-
+				// Save as JSON string in hidden field
+				$("#omb_images_url").val(JSON.stringify(imageData));
 			});
-
 
 			gframe.open();
 			return false;
