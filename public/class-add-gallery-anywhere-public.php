@@ -3,6 +3,9 @@
 /**
  * The public-facing functionality of the plugin.
  *
+ * This class handles the public-facing hooks and actions of the plugin.
+ * It is responsible for enqueuing styles and scripts that are used on the front-end.
+ *
  * @link       https://sopu.me/
  * @since      1.0.0
  *
@@ -13,67 +16,104 @@
 /**
  * The public-facing functionality of the plugin.
  *
- * Defines the plugin name, version, and two examples hooks for how to
- * enqueue the public-facing stylesheet and JavaScript.
+ * Defines the plugin name, version, and hooks for enqueuing public-facing stylesheets
+ * and JavaScript. This class also manages the plugin's frontend assets.
  *
  * @package    Add_Gallery_Anywhere
  * @subpackage Add_Gallery_Anywhere/public
  * @author     Saif Islam <sopu175@gmail.com>
  */
-class Add_Gallery_Anywhere_Public {
+class Add_Gallery_Anywhere_Public
+{
 
-	/**
-	 * The ID of this plugin.
-	 */
-	private $plugin_name;
+    /**
+     * The ID of this plugin.
+     *
+     * @var string
+     */
+    private $plugin_name;
 
-	/**
-	 * The version of this plugin.
-	 */
-	private $version;
+    /**
+     * The version of this plugin.
+     *
+     * @var string
+     */
+    private $version;
 
-	/**
-	 * Initialize the class and set its properties.
-	 */
-	public function __construct( $plugin_name, $version ) {
+    /**
+     * Initialize the class and set its properties.
+     *
+     * @param string $plugin_name The name of this plugin.
+     * @param string $version The version of this plugin.
+     */
+    public function __construct($plugin_name, $version)
+    {
+        $this->plugin_name = $plugin_name;
+        $this->version = $version;
+    }
 
-		$this->plugin_name = $plugin_name;
-		$this->version = $version;
-
-	}
-
-
-
-
-
-	/**
-	 * Register the stylesheets for the public-facing side of the site.
-	 */
-	public function enqueue_styles() {
-
-		wp_enqueue_style( $this->plugin_name.'boostrap', plugin_dir_url( __FILE__ ) . 'css/bootstrap.min.css', array(), $this->version, 'all' );
-		wp_enqueue_style( $this->plugin_name.'lightgallery_css', plugin_dir_url( __FILE__ ) . 'css/lightgallery.css', array(), $this->version, 'all' );
-		wp_enqueue_style( $this->plugin_name.'lightgallery_css2', plugin_dir_url( __FILE__ ) . 'css/lg-transitions.css', array(), $this->version, 'all' );
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/add-gallery-anywhere-public.css', array(), $this->version, 'all' );
-
-	}
-
-
+    /**
+     * Register the stylesheets for the public-facing side of the site.
+     *
+     * This method enqueues the necessary CSS files used on the frontend,
+     * including Bootstrap, LightGallery, and custom plugin styles.
+     */
+    public function enqueue_styles()
+    {
 
 
+        // Enqueue the main LightGallery CSS from the CDN
+        wp_enqueue_style(
+            $this->plugin_name . 'fancybox-css',
+            'https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css',
+            array(),
+            $this->version,
+            'all'
+        );
 
-	/**
-	 * Register the JavaScript for the public-facing side of the site.
-	 */
-	public function enqueue_scripts() {
 
-		wp_enqueue_script( $this->plugin_name.'bootstrap', plugin_dir_url( __FILE__ ) . 'js/bootstrap.min.js', array( 'jquery' ), $this->version, false );
-		wp_enqueue_script( $this->plugin_name.'lightgallery', plugin_dir_url( __FILE__ ) . 'js/lightgallery.min.js', array( 'jquery' ), $this->version, false );
-		wp_enqueue_script( $this->plugin_name.'light_thumnail', plugin_dir_url( __FILE__ ) . 'js/lg-thumbnail.min.js', array( 'jquery' ), $this->version, false );
-		wp_enqueue_script( $this->plugin_name.'light_thumnail', plugin_dir_url( __FILE__ ) . 'js/lg-zoom.min.js', array( 'jquery' ), $this->version, false );
-		wp_enqueue_script( $this->plugin_name.'lg-video', plugin_dir_url( __FILE__ ) . 'js/lg-video.min.js', array( 'jquery' ), $this->version, false );
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/add-gallery-anywhere-public.js', array( 'jquery' ), $this->version, false );
 
-	}
+        // Optionally, you can enqueue your own custom styles for your plugin
+        wp_enqueue_style(
+            $this->plugin_name . 'custom-style',
+            plugin_dir_url(__FILE__) . 'css/add-gallery-anywhere-public.css',
+            array(),
+            $this->version,
+            'all'
+        );
+
+
+    }
+
+    /**
+     * Register the JavaScript for the public-facing side of the site.
+     *
+     * This method enqueues the necessary JavaScript files used for the gallery functionality.
+     */
+
+    public function enqueue_scripts()
+    {
+
+        // Enqueue the main LightGallery JS from the CDN (minified version)
+        wp_enqueue_script(
+            $this->plugin_name . 'fancybox-js',
+            'https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js', // Corrected CDN
+            array('jquery'),
+            $this->version,
+            false
+        );
+
+
+        // Optionally, enqueue your own custom JavaScript for your plugin
+        wp_enqueue_script(
+            $this->plugin_name . 'custom-script',
+            plugin_dir_url(__FILE__) . 'js/add-gallery-anywhere-public.js',
+            array('jquery', 'lightgallery-js'), // Ensure LightGallery JS is loaded first
+            $this->version,
+            false
+        );
+    }
+
 
 }
+

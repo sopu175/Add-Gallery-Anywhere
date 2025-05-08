@@ -28,7 +28,7 @@ if(!empty($image_id)){
 
     if(!empty($image_id)){
     ?>
-    <p style="margin-top: 15px; margin-bottom: 5px"><strong >Selected Images for Gallery</strong></p>
+    <p style="margin-top: 30px; margin-bottom: 5px"><strong >Current Selected Images</strong></p>
     <div style="width:100%;height:auto;" id="images-container2">
         <?php
         foreach ($myArray as $index => $image){

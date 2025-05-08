@@ -28,17 +28,5 @@
 	 */
 
 
-	jQuery( window ).load(function() {
-		if (jQuery('.lightgalleryinit').length > 0) {
-
-
-			jQuery('.lightgalleryinit').lightGallery({
-				selector: 'a',
-				controls: true,
-				counter : true,
-
-			});
-		}
-	 });
 
 

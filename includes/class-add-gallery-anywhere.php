@@ -172,7 +172,7 @@ class Add_Gallery_Anywhere
 
             <?php
 
-            require_once plugin_dir_path(dirname(__FILE__)) . 'public/partials/class-add-gallery-anywhere-template.php';
+            require_once plugin_dir_path(dirname(__FILE__)) . 'public/partials/add-gallery-anywhere-public-display.php';
             return ob_get_clean();
         }
     }

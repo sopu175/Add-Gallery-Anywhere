@@ -69,7 +69,6 @@ class Add_Gallery_Anywhere_Admin
      */
     public function enqueue_styles()
     {
-        wp_enqueue_style($this->plugin_name . 'bootstraps-css', plugin_dir_url(__FILE__) . 'css/bootstrap.min.css', array(), $this->version);
         wp_enqueue_style($this->plugin_name, plugin_dir_url(__FILE__) . 'css/add-gallery-anywhere-admin.css', array(), $this->version, 'all');
 
     }
@@ -93,7 +92,6 @@ class Add_Gallery_Anywhere_Admin
     public function enqueue_scripts()
     {
 
-        wp_enqueue_script($this->plugin_name . 'bootstraps', plugin_dir_url(__FILE__) . 'js/bootstrap.min.js', array('jquery'), $this->version, true);
         wp_enqueue_script($this->plugin_name, plugin_dir_url(__FILE__) . 'js/add-gallery-anywhere-admin.js', array('jquery'), $this->version, false);
 
     }
@@ -273,60 +271,54 @@ class Add_Gallery_Anywhere_Admin
 
     function omb_gallery_info($post)
     {
-        $showimage_per_column = esc_attr(get_post_meta($post->ID, 'omb_images_id', true));
-        $image_url = esc_url(get_post_meta($post->ID, 'omb_images_url', true));
+        $gallery_data = get_post_meta($post->ID, 'gallery_any_where', true);
+        $selected_column = isset($gallery_data['show_per_image']) ? esc_attr($gallery_data['show_per_image']) : 'Default';
+        $image_url = isset($gallery_data['gallery_url']) ? esc_url($gallery_data['gallery_url']) : '';
+
         wp_nonce_field('gallery_any_where', 'gallery_any_where_nonce');
 
+        // Dropdown options
+        $options = array(
+            'Default' => __('Default', 'gallery_any_where'),
+            '6' => __('Six', 'gallery_any_where'),
+            '4' => __('Four', 'gallery_any_where'),
+            '3' => __('Three', 'gallery_any_where'),
+            '2' => __('Two', 'gallery_any_where'),
+        );
 
-        $button_label = esc_attr('Upload Images','gallery_any_where');
-        $title =  esc_attr('Add Gallery Images','gallery_any_where');
-        $show_image_per = esc_attr('Show image per columns','gallery_any_where');
-        $def = esc_attr('Default','gallery_any_where');
-        $six = esc_attr('Six','gallery_any_where');
-        $four = esc_attr('Four','gallery_any_where');
-        $three = esc_attr('Three','gallery_any_where');
-        $two = esc_attr('Two','gallery_any_where');
-        $metabox_html = <<<EOD
-<div class="fields">
-	<div class="field_c">
-	
-		<div class="input_c">
-			<label for="upload_images" class="mylabel">
-		    <strong>{$title}</strong>
-			<button class="button" id="upload_images" >{$button_label}</button>
-</label>
-<hr>
-			<div class="clerfix"></div>
-			<lable for="show_per_img" class="mylabel" style="margin-top:15px"><strong>{$show_image_per}</strong>
-			
-			<select name="show_per_image" id="show_per_img">
-			    <option value="Default">{$def}</option>
-			    <option value="6">{$six}</option>
-			    <option value="4">{$four}</option>
-			    <option value="3">{$three}</option>
-			    <option value="2">{$two}</option>
-            </select>
-			</lable>
-			<hr>
-			<input type="hidden" name="omb_images_url" id="omb_images_url" value="{$image_url}"/>
-		
-			<div class="clearfix"></div>
-			<div style="width:100%;height:auto;" id="images-container"></div>
-			<div class="clearfix"></div>
-			<hr>
-		</div>
-		<div class="float_c"></div>
-	</div>
-	
-</div>
-EOD;
+        echo '<div class="fields"><div class="field_c"><div class="input_c">';
+        echo '<label for="upload_images" class="mylabel"><strong>' . esc_html__('Add Gallery Images', 'gallery_any_where') . '</strong>';
+        echo '<button class="button" id="upload_images">' . esc_html__('Upload Images', 'gallery_any_where') . '</button></label><hr>';
 
-        echo $metabox_html;
-        require plugin_dir_path(__FILE__) . 'partials/add-gallery-anywhere-show-upload-gallery-images.php';
+        echo '<label for="show_per_img" class="mylabel" style="margin-top:15px"><strong>' . esc_html__('Show image per columns', 'gallery_any_where') . '</strong>';
+        echo '<select name="show_per_image" id="show_per_img">';
+        foreach ($options as $value => $label) {
+
+            if($selected_column == $value){
+                echo '<option selected value="' . esc_attr($value)  .'">' . esc_html($label) . '</option>';
+
+            }else{
+                echo '<option value="' . esc_attr($value)  .'">' . esc_html($label) . '</option>';
+
+            }
+            echo   $value . ' - ' . $selected_column;
+        }
+        echo '</select></label><hr>';
+
+        echo '<input type="hidden" name="omb_images_url" id="omb_images_url" value="' . esc_attr($image_url) . '"/>';
+        echo '<div class="clearfix"></div><div style="width:100%;height:auto;" id="images-container">';
+
+        // show previously uploaded images
+        if (!empty($image_url)) {
+            $urls = explode(';', $image_url);
+            foreach ($urls as $url) {
+                echo '<img class="admin_image_single" style="margin-right: 10px;" src="' . esc_url($url) . '" />';
+            }
+        }
+
+        echo '</div><div class="clearfix"></div><hr></div><div class="float_c"></div></div></div>';
+
     }
-
-
-
 
 
 
