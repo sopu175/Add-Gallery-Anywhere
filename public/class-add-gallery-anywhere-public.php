@@ -65,7 +65,7 @@ class Add_Gallery_Anywhere_Public
         // Enqueue the main LightGallery CSS from the CDN
         wp_enqueue_style(
             $this->plugin_name . 'fancybox-css',
-            'https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css',
+            plugin_dir_url(__FILE__) . 'css/fancybox.css',
             array(),
             $this->version,
             'all'
@@ -97,7 +97,7 @@ class Add_Gallery_Anywhere_Public
         // Enqueue the main LightGallery JS from the CDN (minified version)
         wp_enqueue_script(
             $this->plugin_name . 'fancybox-js',
-            'https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js', // Corrected CDN
+            plugin_dir_url(__FILE__) . 'js/fancybox.umd.js',
             array('jquery'),
             $this->version,
             false
