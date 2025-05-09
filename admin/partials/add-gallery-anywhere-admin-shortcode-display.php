@@ -24,7 +24,7 @@ if (!empty($image_id)) {
 
     ?>
 
-    <p><strong><?php echo  esc_html($short) ?></strong></p>
+    <p><input type="text" readonly value="<?php echo  esc_html($short) ?>"/></p>
     <p><strong><?php echo  esc_html($img_per_c) . esc_html($col) ?> </strong></p>
 
     <?php

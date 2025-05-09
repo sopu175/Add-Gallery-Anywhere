@@ -286,31 +286,41 @@ class Add_Gallery_Anywhere_Admin
     function save_gallery_image($post_id)
     {
         // First, verify the nonce before processing form data
-        if (!isset($_POST['gallery_any_where_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gallery_any_where_nonce']), 'add_gallery_any_where'))) {
+        if (!isset($_POST['gallery_any_where_nonce']) || !wp_verify_nonce(wp_unslash($_POST['gallery_any_where_nonce']), 'add_gallery_any_where')) {
             return $post_id; // Exit if nonce verification fails
+        }
+
+        // Ensure that the post is not autosave or revision
+        if (defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) {
+            return $post_id;
+        }
+
+        // Check if the current user can edit the post
+        if (!current_user_can('edit_post', $post_id)) {
+            return $post_id;
         }
 
         // Sanitize the gallery shortcode
         $short_code = '[galleryanywhere id="' . $post_id . '"]';
 
         // Unslash and sanitize 'omb_images_url'
-        $image_json = isset($_POST['omb_images_url']) ? sanitize_text_field(wp_unslash($_POST['omb_images_url'])) : ''; // Unslash before sanitizing
-        $image_data = json_decode($image_json, true);
+        $image_json = isset($_POST['omb_images_url']) ? wp_unslash($_POST['omb_images_url']) : ''; // Unsur the data before sanitizing
+        $image_data = json_decode($image_json, true); // Decode the image data from JSON
 
         // Ensure image data is valid and sanitized
         if (!empty($image_data) && is_array($image_data)) {
-            // Unslash and sanitize 'show_per_image'
-            $show_per_image = isset($_POST['show_per_image']) ? sanitize_text_field(wp_unslash($_POST['show_per_image'])) : 'Default'; // Unsplash before sanitizing
-            $sanitized_show_per_image = sanitize_text_field($show_per_image);
+            // Sanitize and process 'show_per_image'
+            $show_per_image = isset($_POST['show_per_image']) ? wp_unslash($_POST['show_per_image']) : 'Default'; // Unslash before sanitizing
+            $sanitized_show_per_image = sanitize_text_field($show_per_image); // Sanitize the 'show_per_image' value
 
-            // Prepare data for saving
+            // Prepare the data array for saving
             $data = array(
-                'gallery_url' => $image_data, // Full structured image data
-                'shortcode' => sanitize_text_field($short_code), // Ensure shortcode is sanitized
-                'show_per_image' => $sanitized_show_per_image, // Ensure the column setting is sanitized
+                'gallery_url' => $image_data, // Full structured image data (URLs, alt, caption, etc.)
+                'shortcode' => sanitize_text_field($short_code), // Sanitize the shortcode
+                'show_per_image' => $sanitized_show_per_image, // Sanitize the 'show_per_image' value
             );
 
-            // Update post meta with sanitized data
+            // Update the post meta with sanitized data
             update_post_meta($post_id, 'gallery_any_where', $data);
         }
     }
