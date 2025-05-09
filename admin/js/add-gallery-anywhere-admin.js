@@ -48,7 +48,7 @@
 				const attachments = gframe.state().get('selection').toJSON();
 				const imageData = [];
 
-				$("#images-container").html('');
+				$("#images-container").html(''); // Clear the images container
 
 				attachments.forEach(attachment => {
 					const image = {
@@ -57,18 +57,19 @@
 						caption: attachment.caption || ''
 					};
 
+					// You can optionally sanitize here before pushing to the array
 					imageData.push(image);
 
 					$("#images-container").append(`
-						<div class="admin_image_single_wrapper" style="margin-right: 10px; display: inline-block;">
-							<img class="admin_image_single" src="${image.url}" style="display:block; max-width:100px;" />
-							<small><strong>Alt:</strong> ${image.alt}</small>
-							<small><strong>Caption:</strong> ${image.caption}</small>
-						</div>
-					`);
+                    <div class="admin_image_single_wrapper" style="margin-right: 10px; display: inline-block;">
+                        <img class="admin_image_single" src="${image.url}" style="display:block; max-width:100px;" />
+                        <small><strong>Alt:</strong> ${image.alt}</small>
+                        <small><strong>Caption:</strong> ${image.caption}</small>
+                    </div>
+                `);
 				});
 
-				// Save as JSON string in hidden field
+				// Save as JSON string in the hidden field (ensure this is properly sanitized in PHP before saving)
 				$("#omb_images_url").val(JSON.stringify(imageData));
 			});
 
@@ -76,4 +77,5 @@
 			return false;
 		});
 	});
+
 })( jQuery );

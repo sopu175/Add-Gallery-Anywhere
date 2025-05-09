@@ -75,9 +75,9 @@ if ($query->have_posts()) {
                     ?>
 
 
-                    <a data-fancybox="gallery"  data-caption="<?=$sanitized_image_caption?>" data-src="<?= $sanitized_image_url; ?>" href="<?= $sanitized_image_url; ?>"
-                       class="<?= esc_attr($col_class); ?> gallery-item add_gallery_any_where_section_image_single">
-                        <img class="img-responsive" src="<?= $sanitized_image_url; ?>" alt="<?=$sanitized_image_atr?>">
+                    <a data-fancybox="gallery"  data-caption="<?php echo esc_attr($sanitized_image_caption)?>" data-src="<?php echo esc_url($sanitized_image_url); ?>" href="<?php echo esc_url($sanitized_image_url); ?>"
+                       class="<?php echo esc_attr($col_class); ?> gallery-item add_gallery_any_where_section_image_single">
+                        <img class="img-responsive" src="<?php echo esc_url($sanitized_image_url); ?>" alt="<?php echo esc_html($sanitized_image_atr)?>">
                     </a>
 
                     <?php

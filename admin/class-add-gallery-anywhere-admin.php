@@ -134,29 +134,28 @@ class Add_Gallery_Anywhere_Admin
 //	secure admin
     private function is_secured($nonce_field, $action, $post_id)
     {
-        $nonce = isset($_POST[$nonce_field]) ? $_POST[$nonce_field] : '';
+        // Sanitize the nonce before using it
+        $nonce = isset($_POST[$nonce_field]) ? sanitize_text_field(wp_unslash($_POST[$nonce_field])) : '';
 
-        if ($nonce == '') {
-            return false;
-        }
-        if (!wp_verify_nonce($nonce, $action)) {
-            return false;
+        // Check if the nonce is empty or fails verification
+        if ($nonce == '' || !wp_verify_nonce($nonce, $action)) {
+            return false;  // Nonce verification failed
         }
 
+        // Additional checks to ensure the request is legitimate
         if (!current_user_can('edit_post', $post_id)) {
-            return false;
+            return false;  // Current user does not have permission to edit the post
         }
 
         if (wp_is_post_autosave($post_id)) {
-            return false;
+            return false;  // Post is an autosave
         }
 
         if (wp_is_post_revision($post_id)) {
-            return false;
+            return false;  // Post is a revision
         }
 
-        return true;
-
+        return true;  // All checks passed, safe to proceed
     }
 
 
@@ -243,12 +242,12 @@ class Add_Gallery_Anywhere_Admin
 
         add_meta_box(
             'omb_gallery_info',
-            __('Uploads Gallery Images', 'our-metabox'),
+            __('Uploads Gallery Images', 'add-gallery-anywhere'),
             array($this, 'omb_gallery_info'),
             array('gallery_anywhere')
         );
 
-        add_meta_box('shortcode_message_metabox', __('Shortcode', 'our-metabox-shortcode'), array($this, 'shortcode_message_metabox'), array('gallery_anywhere'), 'side', 'high');
+        add_meta_box('shortcode_message_metabox', __('Shortcode', 'add-gallery-anywhere'), array($this, 'shortcode_message_metabox'), array('gallery_anywhere'), 'side', 'high');
     }
 
 
@@ -271,48 +270,8 @@ class Add_Gallery_Anywhere_Admin
 
     function omb_gallery_info($post)
     {
-        $gallery_data = get_post_meta($post->ID, 'gallery_any_where', true);
-        $selected_column = isset($gallery_data['show_per_image']) ? esc_attr($gallery_data['show_per_image']) : 'Default';
-        $image_data = isset($gallery_data['gallery_url']) && is_array($gallery_data['gallery_url']) ? $gallery_data['gallery_url'] : [];
+        require_once plugin_dir_path(dirname(__FILE__)) . 'admin/partials/add-gallery-anywhere-admin-display.php';
 
-        wp_nonce_field('gallery_any_where', 'gallery_any_where_nonce');
-
-        $options = array(
-            'Default' => __('Default', 'gallery_any_where'),
-            '6' => __('Six', 'gallery_any_where'),
-            '4' => __('Four', 'gallery_any_where'),
-            '3' => __('Three', 'gallery_any_where'),
-            '2' => __('Two', 'gallery_any_where'),
-        );
-
-        echo '<div class="fields"><div class="field_c"><div class="input_c">';
-
-        echo '<label for="upload_images" class="mylabel"><strong>' . esc_html__('Add Gallery Images', 'gallery_any_where') . '</strong>';
-        echo '<button class="button" id="upload_images">' . esc_html__('Upload Images', 'gallery_any_where') . '</button></label><hr>';
-
-        echo '<label for="show_per_img" class="mylabel" style="margin-top:15px"><strong>' . esc_html__('Show image per columns', 'gallery_any_where') . '</strong>';
-        echo '<select name="show_per_image" id="show_per_img">';
-        foreach ($options as $value => $label) {
-            $selected = ($selected_column == $value) ? 'selected' : '';
-            echo '<option value="' . esc_attr($value) . '" ' . $selected . '>' . esc_html($label) . '</option>';
-        }
-        echo '</select></label><hr>';
-
-        echo '<input type="hidden" name="omb_images_url" id="omb_images_url" value="' . esc_attr(json_encode($image_data)) . '"/>';
-
-        echo '<div class="clearfix"></div><div style="width:100%;height:auto;" id="images-container">';
-        foreach ($image_data as $img) {
-            $url = esc_url($img['url'] ?? '');
-            $alt = esc_html($img['alt'] ?? '');
-            $caption = esc_html($img['caption'] ?? '');
-            echo '<div class="admin_image_single_wrapper">';
-            echo '<img class="admin_image_single" style="margin-right: 10px; max-width: 100px;" src="' . $url . '" />';
-            echo '<small><strong>Alt:</strong> ' . $alt . '</small>';
-            echo '<small><strong>Caption:</strong> ' . $caption . '</small>';
-            echo '</div>';
-        }
-
-        echo '</div><div class="clearfix"></div><hr></div><div class="float_c"></div></div></div>';
     }
 
 
@@ -326,20 +285,32 @@ class Add_Gallery_Anywhere_Admin
     //save gallery images
     function save_gallery_image($post_id)
     {
-        if (!$this->is_secured('gallery_any_where_nonce', 'gallery_any_where', $post_id)) {
-            return $post_id;
+        // First, verify the nonce before processing form data
+        if (!isset($_POST['gallery_any_where_nonce']) || !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['gallery_any_where_nonce']), 'add_gallery_any_where'))) {
+            return $post_id; // Exit if nonce verification fails
         }
 
+        // Sanitize the gallery shortcode
         $short_code = '[galleryanywhere id="' . $post_id . '"]';
-        $image_json = isset($_POST['omb_images_url']) ? wp_unslash($_POST['omb_images_url']) : '';
+
+        // Unslash and sanitize 'omb_images_url'
+        $image_json = isset($_POST['omb_images_url']) ? sanitize_text_field(wp_unslash($_POST['omb_images_url'])) : ''; // Unslash before sanitizing
         $image_data = json_decode($image_json, true);
 
+        // Ensure image data is valid and sanitized
         if (!empty($image_data) && is_array($image_data)) {
+            // Unslash and sanitize 'show_per_image'
+            $show_per_image = isset($_POST['show_per_image']) ? sanitize_text_field(wp_unslash($_POST['show_per_image'])) : 'Default'; // Unsplash before sanitizing
+            $sanitized_show_per_image = sanitize_text_field($show_per_image);
+
+            // Prepare data for saving
             $data = array(
-                'gallery_url' => $image_data, // full structured image data
-                'shortcode' => sanitize_text_field($short_code),
-                'show_per_image' => isset($_POST['show_per_image']) ? sanitize_text_field($_POST['show_per_image']) : 'Default'
+                'gallery_url' => $image_data, // Full structured image data
+                'shortcode' => sanitize_text_field($short_code), // Ensure shortcode is sanitized
+                'show_per_image' => $sanitized_show_per_image, // Ensure the column setting is sanitized
             );
+
+            // Update post meta with sanitized data
             update_post_meta($post_id, 'gallery_any_where', $data);
         }
     }
@@ -361,34 +332,9 @@ class Add_Gallery_Anywhere_Admin
 
     function shortcode_message_metabox()
     {
-
-        $image_id = get_post_meta(get_the_ID(), 'gallery_any_where', true);
-        $gallery_published = esc_attr('Published The Gallery First','gallery_any_where');
-        if (!empty($image_id)) {
-            $short = esc_attr($image_id['shortcode'],'gallery_any_where');
-            $col = esc_attr($image_id['show_per_image'],'gallery_any_where');
-            if ($col == null) {
-                $col = esc_attr("Default (4 image per col)",'gallery_any_where');
-            }
-            $img_per_c = esc_attr('Image per column:','gallery_any_where');
+        require_once plugin_dir_path(dirname(__FILE__)) . 'admin/partials/add-gallery-anywhere-admin-shortcode-display.php';
 
 
-            $metabox_html = <<<EOD
-        <p><strong>{$short}</strong></p>
-        <p><strong>{$img_per_c} {$col}</strong></p>
-
-EOD;
-
-            echo $metabox_html;
-        } else {
-            $metabox_html = <<<EOD
-        <p><strong>{$gallery_published}</strong></p>
-        
-
-EOD;
-
-            echo $metabox_html;
-        }
 
     }
 
@@ -410,7 +356,7 @@ EOD;
     //    add action for column out
     function custom_table_content( $column_name ,$post_ID) {
         if ($column_name == 'shortcode') {
-            echo sanitize_text_field('[galleryanywhere id="'.$post_ID.'"]');
+            echo '[galleryanywhere id="'.esc_attr($post_ID).'"]';
         }
 
     }
